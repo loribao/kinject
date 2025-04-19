@@ -7,15 +7,7 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8ef4f5f0-0d5d-4f0e-9307-0ffc1652ee4b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/examples/demo_demo/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/examples/demo_demo/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/demo_demo/src/setup.rs" beforeDir="false" afterPath="$PROJECT_DIR$/examples/demo_demo/src/setup.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/demo_domain/src/irepository.rs" beforeDir="false" afterPath="$PROJECT_DIR$/examples/demo_domain/src/irepository.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/demo_domain/src/service.rs" beforeDir="false" afterPath="$PROJECT_DIR$/examples/demo_domain/src/service.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/demo_infra/src/repository.rs" beforeDir="false" afterPath="$PROJECT_DIR$/examples/demo_infra/src/repository.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kinject/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/kinject/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kinject/src/service_provider.rs" beforeDir="false" afterPath="$PROJECT_DIR$/kinject/src/service_provider.rs" afterDir="false" />
-    </list>
+    <list default="true" id="8ef4f5f0-0d5d-4f0e-9307-0ffc1652ee4b" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -146,7 +138,7 @@
       <option name="presentableId" value="Default" />
       <updated>1745064228473</updated>
       <workItem from="1745064230453" duration="3677000" />
-      <workItem from="1745075607092" duration="2842000" />
+      <workItem from="1745075607092" duration="4029000" />
     </task>
     <servers />
   </component>
@@ -158,17 +150,17 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/examples/demo_demo/src/setup.rs</url>
-          <line>51</line>
+          <line>50</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/examples/demo_demo/src/setup.rs</url>
-          <line>52</line>
+          <line>51</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/examples/demo_demo/src/setup.rs</url>
-          <line>54</line>
+          <line>53</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -200,11 +192,6 @@
           <url>file://$PROJECT_DIR$/examples/demo_demo/src/setup.rs</url>
           <line>27</line>
           <option name="timeStamp" value="32" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/examples/demo_demo/src/setup.rs</url>
-          <line>32</line>
-          <option name="timeStamp" value="33" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
