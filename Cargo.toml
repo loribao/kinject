@@ -1,0 +1,5 @@
+[workspace]
+members = [ "examples/demo_demo", "examples/demo_domain", "examples/demo_infra", "kinject"]
+resolver = "2"
+default-members = ["kinject"]
+

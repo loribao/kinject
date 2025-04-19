@@ -1,0 +1,13 @@
+[package]
+name = "kinject"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Adicione aqui as dependências necessárias para o seu projeto
+
+[dev-dependencies]
+# Adicione aqui as dependências de desenvolvimento, se necessário
+
+[lib]
+crate-type = ["cdylib", "rlib"]
