@@ -10,12 +10,13 @@ pub enum Operator {
 }
 #[derive(Debug)]
 pub struct ServiceCalculator {
-    pub repository: Arc<dyn IRepository>,
+    pub repository: Arc<dyn IRepository>
 }
 
 
 impl ServiceCalculator {
     pub fn new(repository: Arc<dyn IRepository>) -> Self {
+
         ServiceCalculator { repository }
     }
     pub fn calc(&self, left: i64, right: i64, oprator: Operator) -> i64 {

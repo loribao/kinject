@@ -7,9 +7,7 @@ use std::io;
 
 fn main() {
     setup::setup();
-    let container = ServiceProvider::get_global()
-        .lock()
-        .expect("Falha ao bloquear o ServiceProvider global");
+    let container = ServiceProvider::get_global();
     let service_calculator = container.resolve::<ServiceCalculator>();
 
     println!("Bem-vindo à calculadora!");

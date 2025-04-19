@@ -40,10 +40,10 @@ kinject/
 
 ### 1. Configuração de Serviços
 
-No arquivo `setup.rs`, registre os serviços no `ServiceProvider`:
+No arquivo `setup.rs`, registre os serviços no `ServiceProvider` de forma fluente e utilize `.set_as_global()` quantas vezes quiser para atualizar o provider global:
 
 ```rust
-use demo_domain::service::ServiceCalculator;
+use demo_domain::service::{ServiceCalculator, Operator};
 use demo_infra::repository::Repository;
 use kinject::service_provider::ServiceProvider;
 
@@ -51,9 +51,11 @@ pub fn setup() {
     let mut service_provider = ServiceProvider::new();
     service_provider
         .register(|_| Repository::new())
-        .register(|p| ServiceCalculator::new(p.resolve::<Repository>()))
-        .build()
-        .set_as_global();
+        .register::<Arc<dyn IRepository>, _>(|_| Arc::new(Repository::new()))
+        .register(|p| ServiceCalculator::new((*p.resolve::<Arc<dyn IRepository>>()).clone()))
+        .set_as_global() // Torna global e permite continuar encadeando
+        .register(|_| ServiceCalculator2::new())
+        .set_as_global(); // Pode ser chamado novamente para atualizar o global
 }
 ```
 
@@ -68,7 +70,7 @@ use kinject::service_provider::ServiceProvider;
 fn main() {
     setup();
 
-    let service_provider = ServiceProvider::get_global().lock().unwrap();
+    let service_provider = ServiceProvider::get_global();
     let calculator = service_provider.resolve::<ServiceCalculator>();
 
     let result = calculator.calc(10, 5, Operator::Add);
@@ -78,16 +80,16 @@ fn main() {
 
 ## Código do ServiceProvider
 
-O `ServiceProvider` é o núcleo do `kinject`. Ele é responsável por gerenciar o ciclo de vida dos serviços registrados e permitir que dependências sejam resolvidas dinamicamente. Abaixo está o código completo do `ServiceProvider`:
+O `ServiceProvider` é o núcleo do `kinject`. Ele é responsável por gerenciar o ciclo de vida dos serviços registrados e permitir que dependências sejam resolvidas dinamicamente. Abaixo está o código atualizado do `ServiceProvider`:
 
 ```rust
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
-    sync::{Arc, Mutex, OnceLock},
+    sync::{Arc, Mutex},
 };
 
-pub static GLOBAL_SERVICE_PROVIDER: OnceLock<Mutex<ServiceProvider>> = OnceLock::new();
+pub static GLOBAL_SERVICE_PROVIDER: Mutex<Option<ServiceProvider>> = Mutex::new(None);
 
 #[derive(Debug, Clone)]
 pub struct ServiceProvider {
@@ -104,7 +106,7 @@ impl ServiceProvider {
     pub fn resolve<T: 'static + Send + Sync>(&self) -> Arc<T> {
         self.services
             .get(&TypeId::of::<T>())
-            .and_then(|s| s.clone().downcast::<T>().ok())
+            .and_then(|s| s.clone().downcast::<Arc<T>>().ok())
             .expect("Service not found")
     }
 
@@ -128,23 +130,15 @@ impl ServiceProvider {
         self
     }
 
-    pub fn build(&mut self) -> Self {
-        if self.services.is_empty() {
-            panic!("ServiceProvider is empty");
-        }
-        self.clone()
+    pub fn set_as_global(&mut self) -> &mut Self {
+        let mut global = GLOBAL_SERVICE_PROVIDER.lock().unwrap();
+        *global = Some(self.clone());
+        self
     }
 
-    pub fn set_as_global(self) -> &'static Mutex<ServiceProvider> {
-        if GLOBAL_SERVICE_PROVIDER.get().is_some() {
-            panic!("Global ServiceProvider is already initialized");
-        }
-        GLOBAL_SERVICE_PROVIDER.set(Mutex::new(self)).unwrap();
-        GLOBAL_SERVICE_PROVIDER.get().unwrap()
-    }
-
-    pub fn get_global() -> &'static Mutex<ServiceProvider> {
-        GLOBAL_SERVICE_PROVIDER.get().unwrap()
+    pub fn get_global() -> ServiceProvider {
+        let global = GLOBAL_SERVICE_PROVIDER.lock().unwrap();
+        global.clone().expect("Global ServiceProvider not set")
     }
 }
 ```
@@ -153,51 +147,29 @@ impl ServiceProvider {
 
 O `ServiceProvider` é um container de serviços que utiliza um `HashMap` para armazenar dependências. Cada serviço é identificado pelo seu `TypeId` e armazenado como um `Arc<dyn Any + Send + Sync>`, permitindo que múltiplas threads compartilhem o mesmo serviço de forma segura.
 
-### Principais Métodos
+### Principais Mudanças
 
-1. **`new()`**:
-   - Cria uma nova instância do `ServiceProvider`.
-   - Inicializa um `HashMap` vazio para armazenar os serviços.
-
-2. **`register()`**:
-   - Registra um serviço no container.
-   - Aceita um closure (`factory`) que cria o serviço. Isso permite que dependências sejam resolvidas dinamicamente.
-
-3. **`resolve()`**:
-   - Resolve um serviço registrado com base no seu tipo.
-   - Retorna um `Arc` para o serviço, permitindo compartilhamento seguro entre threads.
-
-4. **`clear()`**:
-   - Remove todos os serviços registrados no container.
-
-5. **`remove_service()`**:
-   - Remove um serviço específico do container com base no tipo.
-
-6. **`build()`**:
-   - Finaliza a configuração do container e retorna uma cópia dele.
-
-7. **`set_as_global()`**:
-   - Define o `ServiceProvider` como o container global, acessível em todo o programa.
-
-8. **`get_global()`**:
-   - Recupera o container global previamente configurado.
+- **set_as_global fluente:** Agora retorna `&mut Self`, permitindo encadear registros e múltiplas chamadas.
+- **Atualização do global:** O global pode ser sobrescrito quantas vezes quiser durante a execução.
+- **Remoção do OnceLock:** O global agora é protegido por `Mutex<Option<ServiceProvider>>`, facilitando reinicialização e uso em testes.
 
 ### Segurança e Concorrência
 
 - O uso de `Arc` e `Mutex` garante que o `ServiceProvider` seja seguro para uso em ambientes multithread.
-- O método `set_as_global` utiliza `OnceLock` para garantir que o container global seja inicializado apenas uma vez.
+- O método `set_as_global` pode ser chamado múltiplas vezes, sobrescrevendo o global.
 
 ### Benefícios
 
-- **Flexibilidade**: Permite registrar e resolver serviços dinamicamente.
-- **Reutilização**: Serviços podem ser compartilhados entre múltiplas threads.
-- **Centralização**: Um ponto único para gerenciar dependências.
+- **Flexibilidade:** Permite registrar e resolver serviços dinamicamente.
+- **Reutilização:** Serviços podem ser compartilhados entre múltiplas threads.
+- **Centralização:** Um ponto único para gerenciar dependências.
+- **Reconfiguração:** Permite redefinir o global a qualquer momento.
 
 ### Limitações
 
-- **Resolução de serviços não registrados**: Gera um `panic!` se o serviço não for encontrado.
-- **Dependências circulares**: Pode causar loops infinitos durante a resolução.
-- **Concorrência excessiva**: Pode causar contenção de threads devido ao uso de `Mutex`.
+- **Resolução de serviços não registrados:** Gera um `panic!` se o serviço não for encontrado.
+- **Dependências circulares:** Pode causar loops infinitos durante a resolução.
+- **Concorrência excessiva:** Pode causar contenção de threads devido ao uso de `Mutex`.
 
 ## Cenários de Uso
 

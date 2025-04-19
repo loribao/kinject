@@ -4,7 +4,7 @@ use std::{
     sync::{Arc, Mutex, OnceLock},
 };
 
-pub static GLOBAL_SERVICE_PROVIDER: OnceLock<Mutex<ServiceProvider>> = OnceLock::new();
+pub static GLOBAL_SERVICE_PROVIDER: Mutex<Option<ServiceProvider>> = Mutex::new(None);
 
 #[derive(Debug, Clone)]
 pub struct ServiceProvider {
@@ -51,15 +51,15 @@ impl ServiceProvider {
         self.clone()
     }
 
-    pub fn set_as_global(self) -> &'static Mutex<ServiceProvider> {
-        if GLOBAL_SERVICE_PROVIDER.get().is_some() {
-            panic!("Global ServiceProvider is already initialized");
-        }
-        GLOBAL_SERVICE_PROVIDER.set(Mutex::new(self)).unwrap();
-        GLOBAL_SERVICE_PROVIDER.get().unwrap()
-    }
-    pub fn get_global() -> &'static Mutex<ServiceProvider> {
-        GLOBAL_SERVICE_PROVIDER.get().unwrap()
+    pub fn set_as_global(&self) -> Self {
+        let mut global = GLOBAL_SERVICE_PROVIDER.lock().unwrap();
+        *global = Some(self.clone());
+        drop(global); // Release the lock
+        self.clone()
     }
 
+    pub fn get_global() -> ServiceProvider {
+        let global = GLOBAL_SERVICE_PROVIDER.lock().unwrap();
+        global.clone().expect("Global ServiceProvider not set")
+    }
 }
