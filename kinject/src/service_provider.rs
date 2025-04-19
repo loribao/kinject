@@ -1,7 +1,7 @@
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
-    sync::{Arc, Mutex, OnceLock},
+    sync::{Arc, Mutex},
 };
 
 pub static GLOBAL_SERVICE_PROVIDER: Mutex<Option<ServiceProvider>> = Mutex::new(None);
